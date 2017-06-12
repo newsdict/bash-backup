@@ -141,20 +141,6 @@ function archive()
   log::info "####"
 }
 
-function log::info(){
-  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] "$1 2>&1 >> $current_path/$log_name
-  if [ $display_messages -eq 1 ]; then
-    echo "["$(date +"%Y-%m-%d %H:%M:%S")"] "$1
-  fi
-}
-function log::error(){
-  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1 2>&1 >> $current_path/$log_name
-  if [ $display_messages -eq 1 ]; then
-    echo "["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1
-  fi
-  exit 1
-}
-
 function initialize()
 {
   if [ -z "$temporary_directory" ]; then
@@ -173,11 +159,20 @@ function initialize()
     # set default display_messages
     display_messages=1
   fi
+  if [ -z "$archive" ]; then
+    archive=0
+  fi
+  if [ -z "$database" ]; then
+    database=0
+  fi
   if [ -z "$commpression_type" ] ||
     ([ "$commpression_type" != "gzip" ] &&
     [ "$commpression_type" != "zip" ] &&
     [ "$commpression_type" != "bzip2" ]); then
     log::error "commpression_type is not match"
+  fi
+  if [ $archive != 1 ] && [ $database != 1 ]; then
+    log::error "set archive or database"
   fi
 
   working_directory=$current_path/$temporary_directory/$backup_filename.$now
@@ -189,4 +184,18 @@ function clean()
 {
   rm -rf $working_directory
   rm $compress_name
+}
+
+function log::info(){
+  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] "$1 2>&1 >> $current_path/$log_name
+  if [ $display_messages -eq 1 ]; then
+    echo -e "\e[1;32m["$(date +"%Y-%m-%d %H:%M:%S")"] "$1"\e[0m"
+  fi
+}
+function log::error(){
+  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1 2>&1 >> $current_path/$log_name
+  if [ $display_messages -eq 1 ]; then
+    echo -e "\e[1;31m["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1"\e[0m"
+  fi
+  exit 1
 }

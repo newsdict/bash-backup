@@ -24,11 +24,15 @@ source $current_path/functions.sh
 # init app
 initialize
 
-# create archive files from $archive_paths
-archive
+if [ $archive = 1 ]; then
+  # create archive files from $archive_paths
+  archive
+fi
 
-# dump from database
-dump_database
+if [ $database = 1 ]; then
+  # dump from database
+  dump_database
+fi
 
 # compress archive and dump file
 compress
