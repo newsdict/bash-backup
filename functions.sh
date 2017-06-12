@@ -19,31 +19,27 @@ fi
 
 function upload_storage()
 {
-  _backup_path="s3://${s3_conf["bucket"]}/${s3_conf["path"]}/"
+  log::info "####"
+  log::info "# start to upload storage"
+  log::info "####"
+
+  _backup_path="s3://${s3_conf["bucket"]}/${s3_conf["path"]}"
   S3_ACCESS_KEY=${s3_conf["access_key"]}
   S3_SECRET=${s3_conf["secret"]}
-  
-  aws s3 ls
+  _option="--region ${s3_conf["region"]}"
 
-#  echo "[$(date)] awsのストレージにへバックアップファイル（圧縮済）ファイルの転送を開始します..."
-#  echo "aws s3 cp ./html_mysql_backup.$date.tar.gz s3://kamakura-net-backup/$target/ > /dev/null"
-#  aws s3 cp ./html_mysql_backup.$date.tar.gz s3://kamakura-net-backup/$target/ > /dev/null && echo "[$(date)] awsのストレージにへバックアップファイル（圧ファイルの転送が完了しました"
-#
-#  if [ "$2" != "--no-remove" ]; then
-#  	echo "[$(date)] 作業用ファイルの削除を開始します"
-#  	echo "rm -rf ./backup_$date"
-#  	rm -rf ./backup_$date && echo "[$(date)] 作業用ファイルの削除を完了しました"
-#  	echo "rm -f html_mysql_backup.$date.tar.gz"
-#  	rm -f html_mysql_backup.$date.tar.gz && echo "[$(date)] アップロード済みの圧縮ファイルを削除しました。"
-#  fi
-#
-#  echo "[$(date)] 古いファイルを削除します。バックアップは$keep_backup個分残されます"
-#  for file in $(aws s3 ls $backup_path | awk '{print $4}' ); do
-#  	if ! grep $file <(aws s3 ls $backup_path | awk '{print $4}' |tail -n $keep_backup) >/dev/null ;then
-#  		aws s3 rm s3://$backup_path$file && echo "[$(date)] $fileをawsのストレージから削除しました"
-#  	fi
-#  done
-#  popd > /dev/null
+  aws $_option s3 cp --quiet $compress_name $_backup_path/
+  log::info "uploaded: $_backup_path/$(basename $compress_name)"
+
+  for _file in $(aws $_option s3 ls $_backup_path/ | awk '{print $4}' ); do
+  	if ! grep $_file <(aws $_option s3 ls $_backup_path/ | awk '{print $4}' |tail -n ${s3_conf["keep"]}) >/dev/null ;then
+  		aws $_option s3 rm --quiet $_backup_path/$_file && log::info "deleted file: $_backup_path/$_file"
+  	fi
+  done
+
+  log::info "####"
+  log::info "# uploaded storage"
+  log::info "####"
 }
 function compress()
 {
@@ -192,4 +188,5 @@ function initialize()
 function clean()
 {
   rm -rf $working_directory
+  rm $compress_name
 }

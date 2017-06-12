@@ -38,7 +38,3 @@ upload_storage
 
 # clean up temporary files
 clean
-
-# keep
-# syncers
-# notification
