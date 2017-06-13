@@ -26,6 +26,12 @@ edit `.env-sample2` file
 $ sh backup.sh sample1
 $ sh backup.sh sample2
 ```
+## Flow
+
+1. Archive the datas. (tar.gz or tar.bz2 or zip)
+2. mysqldump - only mysql yet....
+3. Rearchive the 1 and 2 (tar.gz or tar.bz2 or zip)
+4. Upload to S3. (Generation management) - only s3 yet.......
 
 ## Environments
 

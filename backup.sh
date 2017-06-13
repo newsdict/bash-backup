@@ -5,7 +5,7 @@
 #
 # backup every day
 #
-# version: 0.1.0
+# version: 0.1.1
 # author: yusuke@newsdict.xyz
 # github: newsdict/bash-backup.git
 # ===================================
