@@ -23,7 +23,8 @@ $ cp env-example .env-sample2
 ```
 edit `.env-sample2` file
 ```
-$ sh backup.sh
+$ sh backup.sh sample1
+$ sh backup.sh sample2
 ```
 
 ## Environments
