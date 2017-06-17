@@ -3,7 +3,7 @@
 # bash-backup
 #  Main backup script by bash 4.*
 #
-# version: 0.1.2
+# version: 0.2.0
 # author: yusuke@newsdict.xyz
 # LICENSE: MIT License
 # github: newsdict/bash-backup.git
@@ -15,7 +15,7 @@ set -o errexit
 set -o pipefail
 
 # Current Paht of script
-current_path=$(dirname $(pwd)/$(dirname $BASH_SOURCE))
+current_path=$(pwd)/$(dirname $BASH_SOURCE)
 
 # Include functions
 source $current_path/functions.sh

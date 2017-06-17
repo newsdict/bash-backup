@@ -14,8 +14,12 @@ date=$(date +%Y%m%d)
 # Requre enviroment file
 if [ ! -z "$1" ] && [ -f $current_path/.env-$1 ]; then
   source $current_path/.env-$1
-else
+elif [ -f $current_path/.env ]; then
   source $current_path/.env
+else
+  # cannot use log::error
+  echo '[ERROR] not found .env file'
+  exit
 fi
 
 function upload_storage()
