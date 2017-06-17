@@ -9,7 +9,7 @@ $ cp env-example .env
 ```
  edit `.env` file
 ```
-$ sh backup.sh
+$ bash backup.sh
 ```
 ### Multiple Targets
 ```
