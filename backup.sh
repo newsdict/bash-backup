@@ -3,10 +3,9 @@
 # bash-backup
 #  Main backup script by bash 4.*
 #
-# backup every day
-#
-# version: 0.1.1
+# version: 0.1.2
 # author: yusuke@newsdict.xyz
+# LICENSE: MIT License
 # github: newsdict/bash-backup.git
 # ===================================
 

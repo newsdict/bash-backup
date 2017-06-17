@@ -3,7 +3,8 @@
 #  Functions file
 #
 # author: yusuke@newsdict.xyz
-# github: newsdict/bash-scripts.git
+# LICENSE: MIT License
+# github: newsdict/bash-backup
 # ===================================
 
 # current date time
