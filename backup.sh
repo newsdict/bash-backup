@@ -3,7 +3,6 @@
 # bash-backup
 #  Main backup script by bash 4.*
 #
-# version: 0.2.0
 # author: yusuke@newsdict.xyz
 # LICENSE: MIT License
 # github: newsdict/bash-backup.git
@@ -20,8 +19,26 @@ current_path=$(pwd)/$(dirname $BASH_SOURCE)
 # Include functions
 source $current_path/functions.sh
 
+# parse arguments
+declare -A options
+pasrse_arguments $@
+
+# debug
+if [ ! -z "${options[debug]}" ]; then
+  set -o xtrace
+fi
+
+# version
+if [ ! -z "${options[0]}" ] && [ ${options[0]} = "version" ]; then
+  version
+  exit
+fi
+
 # init app
 initialize
+
+#require env
+source $(get_require_environments)
 
 if [ $archive = 1 ]; then
   # create archive files from $archive_paths

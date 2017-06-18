@@ -11,17 +11,17 @@
 now=$(date +%Y%m%d%H%M)
 date=$(date +%Y%m%d)
 
-# Requre enviroment file
-if [ ! -z "$1" ] && [ -f $current_path/.env-$1 ]; then
-  source $current_path/.env-$1
-elif [ -f $current_path/.env ]; then
-  source $current_path/.env
-else
-  # cannot use log::error
-  echo '[ERROR] not found .env file'
-  exit
-fi
-
+# Require environment file
+get_require_environments()
+{
+  if [ ! -z "${options[0]}" ] || [ -f $current_path/.env-${options[0]} ] ; then
+    echo $current_path/.env-${options[0]}
+  elif [ -f $current_path/.env ]; then
+    echo $current_path/.env
+  else
+    log::error "not found env file"
+  fi
+}
 function upload_storage()
 {
   log::info "####"
@@ -29,8 +29,8 @@ function upload_storage()
   log::info "####"
 
   _backup_path="s3://${s3_conf["bucket"]}/${s3_conf["path"]}"
-  S3_ACCESS_KEY=${s3_conf["access_key"]}
-  S3_SECRET=${s3_conf["secret"]}
+  export AWS_ACCESS_KEY_ID=${s3_conf["access_key"]}
+  export AWS_SECRET_ACCESS_KEY=${s3_conf["secret"]}
   _option="--region ${s3_conf["region"]}"
 
   aws $_option s3 cp --quiet $compress_name $_backup_path/
@@ -81,7 +81,6 @@ function compress()
   log::info "# end compress"
   log::info "####"
 }
-
 function dump_database()
 {
   log::info "####"
@@ -106,7 +105,6 @@ function dump_database()
   log::info "# end database dump"
   log::info "####"
 }
-
 function archive()
 {
   log::info "####"
@@ -145,52 +143,52 @@ function archive()
   log::info "# end archive"
   log::info "####"
 }
-
+# parse arguments
+#  usage)
+#   declare -A options
+#   pasrse_arguments $@
+function pasrse_arguments()
+{
+  local kv_regex='^--?(.+)=(.+)$'
+  local k_regex='^--?([^=]+)$'
+  local argc=0
+  for arg in $@
+  do
+    if [[ $arg =~ $kv_regex ]]; then
+      options[${BASH_REMATCH[1]}]=${BASH_REMATCH[2]}
+    elif [[ $arg =~ $k_regex ]]; then
+      options[${BASH_REMATCH[1]}]=1
+    else
+      options[$argc]=$arg
+      argc=$(( $argc + 1 ))
+    fi
+  done
+}
 function initialize()
 {
-  if [ -z "$temporary_directory" ]; then
-    # set default temporary directory
-    temporary_directory=tmp
-  fi
-  if [ -z "$log_name" ]; then
-    # set default log filename
-    log_name=logs/backup.$now.log
-  fi
-  if [ -z "$backup_filename" ]; then
-    # set default backup filename
-    backup_filename=backup
-  fi
-  if [ -z "$display_messages" ]; then
-    # set default display_messages
-    display_messages=1
-  fi
-  if [ -z "$archive" ]; then
-    archive=0
-  fi
-  if [ -z "$database" ]; then
-    database=0
-  fi
-  if [ -z "$commpression_type" ] ||
-    ([ "$commpression_type" != "gzip" ] &&
-    [ "$commpression_type" != "zip" ] &&
-    [ "$commpression_type" != "bzip2" ]); then
-    log::error "commpression_type is not match"
-  fi
-  if [ $archive != 1 ] && [ $database != 1 ]; then
-    log::error "set archive or database"
-  fi
+  # default parameters
+  temporary_directory=tmp
+  log_name=logs/backup.$now.log
+  backup_filename=backup
+  display_messages=1
+  archive=0
+  database=0
+  commpression_type=gzip
 
   working_directory=$current_path/$temporary_directory/$backup_filename.$now
   if [ ! -d $working_directory ]; then
     mkdir $working_directory
   fi
 }
+function version()
+{
+  echo $(cat $current_path/VERSION)
+}
 function clean()
 {
   rm -rf $working_directory
   rm $compress_name
 }
-
 function log::info(){
   echo "["$(date +"%Y-%m-%d %H:%M:%S")"] "$1 2>&1 >> $current_path/$log_name
   if [ $display_messages -eq 1 ]; then
