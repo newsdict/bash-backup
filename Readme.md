@@ -9,7 +9,7 @@ $ cp env-example .env
 ```
  edit `.env` file
 ```
-$ bash backup.sh
+$ bash backup.sh [--debug]
 ```
 ### Multiple Targets
 ```
@@ -23,8 +23,8 @@ $ cp env-example .env-sample2
 ```
 edit `.env-sample2` file
 ```
-$ sh backup.sh sample1
-$ sh backup.sh sample2
+$ sh backup.sh [--debug] sample1
+$ sh backup.sh [--debug] sample2
 ```
 ## Flow
 
