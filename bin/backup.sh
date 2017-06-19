@@ -14,7 +14,12 @@ set -o errexit
 set -o pipefail
 
 # Current Paht of script
-current_path=$(pwd)/$(dirname $BASH_SOURCE)
+dir_pattern=/usr/local
+if [[ $BASH_SOURCE =~ $dir_pattern ]]; then
+  current_path=$(readlink -f $(dirname $BASH_SOURCE)/../share/bash-backup)
+else
+  current_path=$(readlink -f $(dirname $BASH_SOURCE)/../)
+fi
 
 # Include functions
 source $current_path/functions.sh
@@ -37,8 +42,17 @@ fi
 # init app
 initialize
 
-#require env
-source $(get_require_environments)
+if [ ! -z "$(get_require_environments)" ];then
+  #require env
+  source $(get_require_environments)
+else
+  echo 'Not Found .env[-*] file'
+  echo " $ cp $current_path/env-example $HOME/.env and Edit"
+  exit
+fi
+
+# create temporary directory
+create_temporary_directory
 
 if [ $archive = 1 ]; then
   # create archive files from $archive_paths

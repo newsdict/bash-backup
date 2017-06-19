@@ -9,17 +9,19 @@
 
 # current date time
 now=$(date +%Y%m%d%H%M)
-date=$(date +%Y%m%d)
+serial=$(( ( RANDOM % 100 )  + 1 ))
 
 # Require environment file
 get_require_environments()
 {
-  if [ ! -z "${options[0]}" ] || [ -f $current_path/.env-${options[0]} ] ; then
+  if [ ! -z "${options[0]}" ] && [ -f $current_path/.env-${options[0]} ] ; then
     echo $current_path/.env-${options[0]}
+  elif [ ! -z "${options[0]}" ] && [ -f $HOME/.env-${options[0]} ] ; then
+    echo $HOME/.env-${options[0]}
   elif [ -f $current_path/.env ]; then
     echo $current_path/.env
-  else
-    log::error "not found env file"
+  elif [ -f $HOME/.env ]; then
+    echo $HOME/.env
   fi
 }
 function upload_storage()
@@ -54,7 +56,7 @@ function compress()
 
   pushd $working_directory > /dev/null
 
-  _compress_name=$current_path/$temporary_directory/$backup_filename.$date
+  _compress_name=$temporary_directory/$backup_filename.$now
 
   if [ "$commpression_type" = "gzip" ]; then
 
@@ -93,11 +95,11 @@ function dump_database()
       user = ${database_conf["username"]}
       password = ${database_conf["password"]}
       port = ${database_conf["port"]}
-      host = ${database_conf["host"]}" > $current_path/$temporary_directory/my.cnf
+      host = ${database_conf["host"]}" > $temporary_directory/my.cnf.$serial
     mysqldump \
-      --defaults-file=$current_path/$temporary_directory/my.cnf \
+      --defaults-file=$temporary_directory/my.cnf.$serial \
       ${database_conf["name"]} > $_dump_file
-    rm $current_path/$temporary_directory/my.cnf
+    rm $temporary_directory/my.cnf.$serial
     log::info "dump file: $_dump_file"
 
   fi
@@ -167,15 +169,17 @@ function pasrse_arguments()
 function initialize()
 {
   # default parameters
-  temporary_directory=tmp
-  log_name=logs/backup.$now.log
+  temporary_directory=/tmp
+  log_name=/var/log/backup.$now.log
   backup_filename=backup
   display_messages=1
   archive=0
   database=0
   commpression_type=gzip
-
-  working_directory=$current_path/$temporary_directory/$backup_filename.$now
+}
+function create_temporary_directory()
+{
+  working_directory=$temporary_directory/$backup_filename.$now.$serial
   if [ ! -d $working_directory ]; then
     mkdir $working_directory
   fi
@@ -186,17 +190,19 @@ function version()
 }
 function clean()
 {
+  log::info "script log: $log_name"
+  log::info "Complete script"
   rm -rf $working_directory
   rm $compress_name
 }
 function log::info(){
-  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] "$1 2>&1 >> $current_path/$log_name
+  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] "$1 2>&1 >> $log_name
   if [ $display_messages -eq 1 ]; then
     echo -e "\e[1;32m["$(date +"%Y-%m-%d %H:%M:%S")"] "$1"\e[0m"
   fi
 }
 function log::error(){
-  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1 2>&1 >> $current_path/$log_name
+  echo "["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1 2>&1 >> $log_name
   if [ $display_messages -eq 1 ]; then
     echo -e "\e[1;31m["$(date +"%Y-%m-%d %H:%M:%S")"] [ERROR] "$1"\e[0m"
   fi

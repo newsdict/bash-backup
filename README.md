@@ -1,5 +1,5 @@
 # bash-backup
-Simple backup shell script by bash v4.*.
+A simple backup shell script by bash 'v4.*'.
 
 ## Usage
 ```
