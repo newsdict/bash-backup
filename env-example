@@ -11,12 +11,12 @@
 # Temporary Directory
 #  default: ./tmp
 #
-temporary_directory=tmp
+temporary_directory=/tmp
 
 #
 # log name
 #
-log_name=logs/backup.$now.log
+log_name=/var/log/backup.$now.log
 
 #
 # backup filename
